@@ -22,31 +22,42 @@ Small;B1;How strenuous was the task?;borg;1;4;1;3;4;2;1;0;1;0
 Small;C1;I thought the system was easy to use.;likert;5;1;2;2;2;2;1;1;1;4
 ```
 
+# Visualzation
+
 How can we make a fancy paper figure from this data?
 
-# TL;DR
 
 ```sh
-python viz.py questionnaire.csv 
+python viz.py viz questionnaire.csv 
 ```
 
-will create the figures and legends per scale (in this case, TLX, Borg CR10, and 7-point Likert System Usability Scale).
+will create the figures and legends per scale (in this case, TLX, Borg CR10, and 7-point Likert System Usability Scale) in the "figures" subfolder:
 
-
-# 
-
-
-
-# Results
-
-## TLX
+**TLX**
 ![](figures/questionnaire_tlx.png)
 ![](figures/scale_tlx.png)
 
-## Borg
+**Borg**
 ![](figures/questionnaire_borg.png)
 ![](figures/scale_borg.png)
 
-## Borg
+**Likert**
 ![](figures/questionnaire_likert.png)
 ![](figures/scale_likert.png)
+
+# Pairwise Wilcoxon Tests
+
+```sh
+python viz.py viz questionnaire.csv 
+```
+
+```txt
+A3
+            Big     Small
+Big    1.000000  0.007526
+Small  0.007526  1.000000
+C1
+            Big     Small
+Big    1.000000  0.007369
+Small  0.007369  1.000000
+```

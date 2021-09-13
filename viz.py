@@ -1,9 +1,11 @@
 from pathlib import Path
 import pandas as pd
+from pandas.core.frame import DataFrame
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.pyplot import Axes
+import scikit_posthocs as sp
 
 import fire
 
@@ -114,28 +116,12 @@ def viz_question(question_reponses: pd.DataFrame, condition: str, ax: Axes, ques
     ax.tick_params(axis="y", which="major",length=0)
     ax.set_facecolor('white')
 
-def load_questionnaire(path_to_csv):
-    q = pd.read_csv(path_to_csv, sep=";")
-    assert "Condition" in q.columns
-    assert "QuestionId" in q.columns
-    assert "QuestionText" in q.columns
-    assert "Scale" in q.columns
-
-    return q
-
-def viz(path_to_csv):
-    q = load_questionnaire(path_to_csv)
-    
-    cols_participants = set(q.columns).difference(set(["Condition", "QuestionId", "QuestionText", "Scale"]))
-
-    print(f"Asserting {cols_participants} represent the responses per Participant")
-
-    q_melted = q.melt(id_vars=["Condition", "QuestionId", "QuestionText", "Scale"], value_vars=cols_participants, var_name="ParticipantId", value_name="Response")
-    scales = q_melted["Scale"].unique()
+def viz(questionaire: DataFrame):   
+    scales = questionaire["Scale"].unique()
 
     for scale in scales:
 
-        question_ids = q[q["Scale"] == scale]["QuestionId"].unique()
+        question_ids = questionaire[questionaire["Scale"] == scale]["QuestionId"].unique()
         n_questions = len(question_ids)
 
         # fig, axes = plt.subplots(n_questions, 1, figsize=(3 * n_questions, 1.1 * n_questions), 
@@ -152,13 +138,13 @@ def viz(path_to_csv):
         
         for question_idx in range(n_questions):
             question_id = question_ids[question_idx]
-            question_responses = q_melted[q_melted["QuestionId"] == question_id]
+            question_responses = questionaire[questionaire["QuestionId"] == question_id]
             
             
             question_text = question_responses["QuestionText"].values[0]
             question_scale = question_responses["Scale"].values[0]
 
-            question_reponses = q_melted[q_melted["QuestionId"] == question_id]
+            question_reponses = questionaire[questionaire["QuestionId"] == question_id]
 
             if n_questions > 1:
                 ax = axes[question_idx]
@@ -178,9 +164,53 @@ def viz(path_to_csv):
         set_scale(ax, scale, palettes[scale])
         fig.savefig(OUTPUT_DIR / f"scale_{scale}.{FORMAT}")
 
-    
+
+def test_question(question_id, questionnaire, p_adjust):
+    q_samples = questionnaire[questionnaire["QuestionId"] == question_id] 
+    test_result = sp.posthoc_wilcoxon(q_samples, val_col="Response", group_col="Condition", p_adjust=p_adjust)
+    return pd.DataFrame(test_result)
+
+def test_all_questions(questionnaire, alpha, p_adjust):
+    interesting_questions = {}
+    for q_id in questionnaire["QuestionId"].unique():
+        test_result = test_question(q_id, questionnaire, p_adjust)
+        if True in (test_result < alpha).values:
+            interesting_questions[q_id] = test_result
+    return interesting_questions
+
+
+class CLI:
+
+    def _load_questionnaire(self, path_to_csv):
+        q = pd.read_csv(path_to_csv, sep=";")
+        assert "Condition" in q.columns
+        assert "QuestionId" in q.columns
+        assert "QuestionText" in q.columns
+        assert "Scale" in q.columns
+
+            
+        cols_participants = set(q.columns).difference(set(["Condition", "QuestionId", "QuestionText", "Scale"]))
+        print(f"Asserting {cols_participants} represent the responses per Participant")
+        q_melted = q.melt(id_vars=["Condition", "QuestionId", "QuestionText", "Scale"], value_vars=cols_participants, var_name="ParticipantId", value_name="Response")
+        
+
+        return q_melted
+
+    def viz(self, path_to_csv):
+        q = self._load_questionnaire(path_to_csv)
+        viz(q)
+
+    def pairwise(self, path_to_csv):
+        q = self._load_questionnaire(path_to_csv)
+        results = test_all_questions(q, .05, p_adjust="bonferroni")
+
+        for question_id, p_matrix in results.items():
+            print(question_id)
+            print(p_matrix)
+
 
 if __name__ == "__main__":
-    # python viz.py questionnaire.csv
-    fire.Fire(viz)
+    # python viz.py viz questionnaire.csv
+    # python viz.py pairwise questionnaire.csv
+    fire.Fire(CLI)
     
