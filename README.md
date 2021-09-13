@@ -1,7 +1,3 @@
----
-title: "Visualizing questionnaire results with compact stacked bar charts"
----
-
 # Problem Setup
 
 Let's assume we performed a within-subject study with two conditions _Big_ and _Small_, asking the same questions A1, A2, A3, B1, and C1, where A1 to A3 are measured by a TLX scale, B1 is measured by a Borg Scale, and C1 is measured by 7-point Likert scale.
