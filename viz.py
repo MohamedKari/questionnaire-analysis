@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ from matplotlib.pyplot import Axes
 import fire
 
 FORMAT = "png"
+OUTPUT_DIR = Path("figures")
 
 palettes = {
     "tlx": {
@@ -168,12 +170,13 @@ def viz(path_to_csv):
         
         # ax = fig.add_axes([0.25, 0.075, 0.5, 0.05])
         # set_scale(ax, scale, palettes[scale])
-        plt.savefig(f"questionnaire_{scale}.{FORMAT}")
+        OUTPUT_DIR.mkdir(exist_ok=True)
+        plt.savefig(OUTPUT_DIR / f"questionnaire_{scale}.{FORMAT}")
 
 
         fig, ax = plt.subplots(figsize=(10, 1), gridspec_kw={"top": 1, "left": 0, "right": 1, "bottom": 0.5})
         set_scale(ax, scale, palettes[scale])
-        fig.savefig(f"scale_{scale}.{FORMAT}")
+        fig.savefig(OUTPUT_DIR / f"scale_{scale}.{FORMAT}")
 
     
 

@@ -40,13 +40,13 @@ will create the figures and legends per scale (in this case, TLX, Borg CR10, and
 # Results
 
 ## TLX
-![](questionnaire_tlx.png)
-![](scale_tlx.png)
+![](figures/questionnaire_tlx.png)
+![](figures/scale_tlx.png)
 
 ## Borg
-![](questionnaire_borg.png)
-![](scale_borg.png)
+![](figures/questionnaire_borg.png)
+![](figures/scale_borg.png)
 
 ## Borg
-![](questionnaire_likert.png)
-![](scale_likert.png)
+![](figures/questionnaire_likert.png)
+![](figures/scale_likert.png)
